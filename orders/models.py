@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.contrib.contenttypes.models import ContentType
+#from django.contrib.contenttypes import fields
 # Create your models here.
 
 class Toppings(models.Model): 
@@ -10,21 +11,46 @@ class Toppings(models.Model):
 
 class Crust(models.Model):
     crust = models.CharField(max_length = 64)
-    price = models.DecimalField(max_digits=5, decimal_places=2)
+    
     
     def __str__(self):
-        return f"{self.crust} {self.price}"
+        return f"{self.crust}"
 
 class Size(models.Model):
     size = models.CharField(max_length = 64)
-    #price = models.DecimalField(max_digits=5, decimal_places=2)
+    
     
     def __str__(self):
-        return f"{self.size} {self.price}"
+        return f"{self.size}"
 
 class Flavour(models.Model):
     flavour = models.CharField(max_length = 64)
     price = models.DecimalField(max_digits=5, decimal_places=2)
+    #fields.GenericRelation(Pizza)
+    
+    def __str__(self):
+        return f"{self.flavour} {self.price}"
+
+class FlavourLReg(models.Model):
+    flavour = models.CharField(max_length = 64)
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    #fields.GenericRelation(Pizza)
+    
+    def __str__(self):
+        return f"{self.flavour} {self.price}"
+
+class FlavourLSic(models.Model):
+    flavour = models.CharField(max_length = 64)
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    #fields.GenericRelation(Pizza)
+    
+    def __str__(self):
+        return f"{self.flavour} {self.price}"
+
+class FlavourSSic(models.Model):
+    flavour = models.CharField(max_length = 64)
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    #fields.GenericRelation(Pizza)
     
     def __str__(self):
         return f"{self.flavour} {self.price}"
@@ -32,8 +58,30 @@ class Flavour(models.Model):
 class Pizza(models.Model):
     size = models.ForeignKey(Size, on_delete = models.CASCADE, related_name="pizzasize")
     crust = models.ForeignKey(Crust, on_delete = models.CASCADE, related_name="pizzacrust")
-    flavour = models.ForeignKey(Flavour, on_delete = models.CASCADE, related_name="pizzaflavour")
+    flavoursr = models.ForeignKey(Flavour, null=True, blank=True, on_delete = models.CASCADE, related_name="fsr")
+    flavourlr = models.ForeignKey(FlavourLReg, null=True, blank=True, on_delete = models.CASCADE, related_name="flr")
+    flavourss = models.ForeignKey(FlavourSSic, null=True, blank=True, on_delete = models.CASCADE, related_name="fss")
+    flavourls = models.ForeignKey(FlavourLSic, null=True, blank=True, on_delete = models.CASCADE, related_name="fls")
+    
+    
     toppings = models.ManyToManyField(Toppings, blank=True, related_name="pizzatoppings")
+
+    #content_type = models.ForeignKey(ContentType, on_delete = models.CASCADE)
+    #object_id = models.PositiveIntegerField()
+    #content_object = fields.GenericForeignKey('content_type', 'object_id')
+
+    @property
+    def owner(self):
+        if self.flavoursr_id is not None:
+            return self.flavoursr
+        if self.flavourlr_id is not None:
+            return self.flavourlr
+        if self.flavourss_id is not None:
+            return self.flavourss
+        if self.flavourls_id is not None:
+            return self.flavourls
+        raise AssertionError("Pizza Type is not set")
     
     def __str__(self):
-        return f"{self.size} {self.crust} {self.flavour} {self.toppings}"
+        return f"{self.size} {self.crust} {self.owner} {self.toppings}"
+

@@ -1,25 +1,52 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block title %} Pizza {% endblock %} {% block body %}
+<h1>Pizza</h1>
+<ul>
+    <li>Pizza Size: {{ pizzasex.size }}</li>
+    <li>Crust: {{ pizzasex.crust }}</li>
+    <li>Flavour: {{ pizzasex.owner.flavour }}</li>
+    <li>Price: {{ pizzasex.owner.price }}</li>
+    <li>
+        Toppings:
+        <ul>
+            {% for topping in toppingsex %}
+            <li>{{ topping }}</li>
+            {% empty %}
+            <li>No topping</li>
+            {% endfor %}
+        </ul>
+    </li>
+</ul>
+<h2>Add a Pizza</h2>
+<form action="" method="post">
+    {% csrf_token %}
+    <select name="topping">
+        {% for t in topping %}
+        <option value="{{ t.id }}">{{ t }}</option>
+        {% endfor %}
+    </select>
+    <select name="crust" id="whichcrust">
+        {% for c in crust %}
+        <option value="{{ c.id }}">{{ c }}</option>
+        {% endfor %}
+    </select>
+    <select name="size">
+        {% for s in size %}
+        <option value="{{ s.id }}">{{ s }}</option>
+        {% endfor %}
+    </select>
+    <select name="flavour">
+        {% for f in flavour %}
+        <option value="{{ f.id }}">{{ f }}</option>
+        {% endfor %}
+    </select>
+    <input type="submit" value="Add Pizza" />
+</form>
+<button type="button" onclick="myFunction()">Try it</button>
+<p id="demo"></p>
 
-{% block title %}
-    Pizza
-{% endblock %}
-
-{% block body %}
-    <h1>Pizza</h1>
-    <ul>
-        <li>Pizza Size: {{ pizzas.size }}</li>
-        <li>Crust: {{ pizzas.crust }}</li>
-        <li>Flavour:  {{ pizzas.flavour }}</li>
-        <li>
-            Toppings:
-            <ul>
-                {% for topping in toppings %}
-                    <li>{{ topping }}</li>
-                {% empty %}
-                    <li>No topping</li>
-                {% endfor %}
-            </ul>
-        </li>
-    </ul>
-
-{% endblock %}
+<script>
+    function myFunction() {
+        var x = document.getElementById("whichcrust").value;
+        document.getElementById("demo").innerHTML = x;
+    }
+</script> {% endblock %}
