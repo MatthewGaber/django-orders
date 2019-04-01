@@ -1,4 +1,12 @@
-{% extends "base.html" %} {% block title %} Pizza {% endblock %} {% block body %}
+{% extends "base.html" %}{% block head %} {% verbatim %}
+<script id="flav" type="text/x-handlebars-template"> 
+    <select name="whatflavour" id = "whichflavour">
+        {% for i in f %}
+        <option value="{{ i }}">{{ i }}</option>
+        {% endfor %}
+    </select>
+
+</script> {% endverbatim %} {% endblock %} {% block body %}
 <h1>Pizza</h1>
 <ul>
     <li>Pizza Size: {{ pizzasex.size }}</li>
@@ -17,36 +25,58 @@
     </li>
 </ul>
 <h2>Add a Pizza</h2>
-<form action="" method="post">
-    {% csrf_token %}
-    <select name="topping">
-        {% for t in topping %}
-        <option value="{{ t.id }}">{{ t }}</option>
-        {% endfor %}
-    </select>
-    <select name="crust" id="whichcrust">
-        {% for c in crust %}
-        <option value="{{ c.id }}">{{ c }}</option>
-        {% endfor %}
-    </select>
-    <select name="size">
-        {% for s in size %}
-        <option value="{{ s.id }}">{{ s }}</option>
-        {% endfor %}
-    </select>
-    <select name="flavour">
-        {% for f in flavour %}
-        <option value="{{ f.id }}">{{ f }}</option>
-        {% endfor %}
-    </select>
-    <input type="submit" value="Add Pizza" />
-</form>
-<button type="button" onclick="myFunction()">Try it</button>
-<p id="demo"></p>
+<div id='theorder'>
+    <form action="" method="post">
+        {% csrf_token %}
+        <select name="topping">
+            {% for t in topping %}
+            <option value="{{ t }}">{{ t }}</option>
+            {% endfor %}
+        </select>
+        <select name="crust" id="whichcrust">
+            {% for c in crust %}
+            <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+        </select>
+        <select name="size" id="whichsize">
+            {% for s in size %}
+            <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+        </select>
 
+        <select name="flavmodel" id="flavmodel"></select>
+
+
+        <input type="submit" value="Add Pizza" />
+
+        <p id="demo"></p>
+
+
+        <div> {{ form }} </div>
+    </form>
+</div>
+{% block javascript %}
 <script>
-    function myFunction() {
-        var x = document.getElementById("whichcrust").value;
-        document.getElementById("demo").innerHTML = x;
-    }
-</script> {% endblock %}
+    $("#whichsize").change(function () {
+        var size = $(this).val();
+        console.log($(this).val());
+
+        $.ajax({
+            url: '/getmodel',
+            data: {
+                'size': size
+            },
+            dataType: 'json',
+            success: function (data) {
+                if (data) {
+                    console.log(data);
+                    $("#flavmodel option").remove();
+                    for (var i = data.length - 1; i >= 0; i--) {
+                        console.log(data[i].fields['flavour'])
+                        $("#flavmodel").append('<option>' + data[i].fields['flavour']+data[i].fields['price'] + '</option>');
+                    };
+                }
+            }
+        });
+    });
+</script> {% endblock %} {% endblock %}
