@@ -26,21 +26,21 @@
 </ul>
 <h2>Add a Pizza</h2>
 <div id='theorder'>
-    <form action="" method="post">
+    <form action="/addpizza" method="post">
         {% csrf_token %}
-        <select name="topping">
+        <select multiple="multiple" id="id_toppings" name="topping">
             {% for t in topping %}
-            <option value="{{ t }}">{{ t }}</option>
+            <option value="{{ t.id }}">{{ t }}</option>
             {% endfor %}
         </select>
         <select name="crust" id="whichcrust">
             {% for c in crust %}
-            <option value="{{ c }}">{{ c }}</option>
+            <option value="{{ c.id }}">{{ c }}</option>
             {% endfor %}
         </select>
         <select name="size" id="whichsize">
             {% for s in size %}
-            <option value="{{ s }}">{{ s }}</option>
+            <option value="{{ s.id }}">{{ s }}</option>
             {% endfor %}
         </select>
 
@@ -69,12 +69,13 @@
             dataType: 'json',
             success: function (data) {
                 if (data) {
-                    console.log(data);
-                    $("#flavmodel option").remove();
-                    for (var i = data.length - 1; i >= 0; i--) {
-                        console.log(data[i].fields['flavour'])
-                        $("#flavmodel").append('<option>' + data[i].fields['flavour']+data[i].fields['price'] + '</option>');
-                    };
+                    $.each(data, function (i, item) {
+                        $('#flavmodel').append($('<option>', {
+                            value: item.pk,
+                            text: item.fields['flavour'] + item.fields['price']
+                        }));
+                    });
+                    
                 }
             }
         });

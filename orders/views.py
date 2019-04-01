@@ -1,5 +1,6 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core import serializers
@@ -44,7 +45,22 @@ def getmodel(request):
     
         
 
-def addpizza(request, t, c, s, f):
-    print(t)
+def addpizza(request):
+    if request.method == 'POST':
+        toppings = request.POST['topping']
+        size = request.POST['size']
+        crust = request.POST['crust']
+        flavour = request.POST['flavmodel']
+        print(toppings)
+        print(size)
+        print(crust)
+        print(flavour)
+    newPizza = Pizza.objects.create(
+        size = Size.objects.get(pk=size),
+        crust = Crust.objects.get(pk=crust),
+        flavoursr = Flavour.objects.get(pk=flavour)
+    )
+    newPizza.toppings.add(Toppings.objects.get(pk=toppings))
 
 
+    return HttpResponse('wtf', content_type="application/json")
