@@ -38,8 +38,9 @@
 
         <select name="flavmodel" id="flavmodel"></select>
 
-
+        {% if user.is_authenticated %}
         <input type="submit" value="Add Pizza" />
+        {% endif %}
 
         <p id="demo"></p>
 
