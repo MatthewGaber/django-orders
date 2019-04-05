@@ -4,8 +4,9 @@ from django.urls import reverse
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core import serializers
-from .forms import SignupForm
+from .forms import LargeSicilian, SmallSicilian
 from django.http import JsonResponse
+
 
 from .models import Pizza, Toppings, Crust, Size, Flavour, FlavourLReg, FlavourLSic, FlavourSSic
 
@@ -16,7 +17,7 @@ def index(request):
     #fls = json.dumps(list(fl), cls=DjangoJSONEncoder)
     #fls = json.dumps(fl)
     fls = serializers.serialize('json', fl)
-    form = SignupForm()
+    form = SmallSicilian()
     context = {
         "form": form,
         "pizzasex": pizza,
@@ -30,12 +31,12 @@ def index(request):
         "flavourssic": FlavourSSic.objects.all()
 
     }
-    return render(request, "index.html", context)
+    return render(request, "orders/index.html", context)
 
 def getmodel(request):
     size = request.GET.get('size', None)
-    print(size)
-    if size == 'Small':
+    print(type(size))
+    if size == '2':
         data = serializers.serialize('json', FlavourSSic.objects.all())
         return HttpResponse(data, content_type="application/json")
     else:
@@ -55,12 +56,13 @@ def addpizza(request):
         print(size)
         print(crust)
         print(flavour)
-    newPizza = Pizza.objects.create(
-        size = Size.objects.get(pk=size),
-        crust = Crust.objects.get(pk=crust),
-        flavoursr = Flavour.objects.get(pk=flavour)
-    )
+        newPizza = Pizza.objects.create(
+            size = Size.objects.get(pk=size),
+            crust = Crust.objects.get(pk=crust),
+            flavoursr = Flavour.objects.get(pk=flavour)
+        )
     newPizza.toppings.add(Toppings.objects.get(pk=toppings))
 
 
     return HttpResponse('wtf', content_type="application/json")
+

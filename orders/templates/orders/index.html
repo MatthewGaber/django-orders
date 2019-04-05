@@ -1,12 +1,4 @@
-{% extends "base.html" %}{% block head %} {% verbatim %}
-<script id="flav" type="text/x-handlebars-template"> 
-    <select name="whatflavour" id = "whichflavour">
-        {% for i in f %}
-        <option value="{{ i }}">{{ i }}</option>
-        {% endfor %}
-    </select>
-
-</script> {% endverbatim %} {% endblock %} {% block body %}
+{% extends "orders/base.html" %}{% block head %}  {% endblock %} {% block body %}
 <h1>Pizza</h1>
 <ul>
     <li>Pizza Size: {{ pizzasex.size }}</li>
@@ -55,29 +47,4 @@
         <div> {{ form }} </div>
     </form>
 </div>
-{% block javascript %}
-<script>
-    $("#whichsize").change(function () {
-        var size = $(this).val();
-        console.log($(this).val());
-
-        $.ajax({
-            url: '/getmodel',
-            data: {
-                'size': size
-            },
-            dataType: 'json',
-            success: function (data) {
-                if (data) {
-                    $.each(data, function (i, item) {
-                        $('#flavmodel').append($('<option>', {
-                            value: item.pk,
-                            text: item.fields['flavour'] + item.fields['price']
-                        }));
-                    });
-                    
-                }
-            }
-        });
-    });
-</script> {% endblock %} {% endblock %}
+{% endblock %}
