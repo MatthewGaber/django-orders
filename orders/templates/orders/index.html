@@ -1,51 +1,81 @@
-{% extends "orders/base.html" %}{% block head %}  {% endblock %} {% block body %}
-<h1>Pizza</h1>
-<ul>
-    <li>Pizza Size: {{ pizzasex.size }}</li>
-    <li>Crust: {{ pizzasex.crust }}</li>
-    <li>Flavour: {{ pizzasex.owner.flavour }}</li>
-    <li>Price: {{ pizzasex.owner.price }}</li>
-    <li>
-        Toppings:
-        <ul>
-            {% for topping in toppingsex %}
-            <li>{{ topping }}</li>
-            {% empty %}
-            <li>No topping</li>
-            {% endfor %}
-        </ul>
-    </li>
-</ul>
-<h2>Add a Pizza</h2>
-<div id='theorder'>
-    <form action="/addpizza" method="post">
-        {% csrf_token %}
-        <select multiple="multiple" id="id_toppings" name="topping">
-            {% for t in topping %}
-            <option value="{{ t.id }}">{{ t }}</option>
-            {% endfor %}
-        </select>
-        <select name="crust" id="whichcrust">
-            {% for c in crust %}
-            <option value="{{ c.id }}">{{ c }}</option>
-            {% endfor %}
-        </select>
-        <select name="size" id="whichsize">
-            {% for s in size %}
-            <option value="{{ s.id }}">{{ s }}</option>
-            {% endfor %}
-        </select>
+{% extends "orders/base.html" %}{% block head %} {% endblock %} {% block body %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9 col-md-9 col-lg-8 mx-auto">
+            <div class="card my-5">
+                <div class="card-body" id="cardbody">
+                    <h5 class="card-title text-center">Pizza</h5>
+                    <!-- cannot be any space before svg div - cannot select it -->
+                    <div id='theorder'>
+                        <form action="/addpizza" method="post">
+                            {% csrf_token %}
+                            <select name="crust" id="whichcrust">
+                                {% for c in crust %}
+                                <option value="{{ c.id }}">{{ c }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="size" id="whichsize">
+                                {% for s in size %}
+                                <option value="{{ s.id }}">{{ s }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="flavmodel" id="whichflavmodel">
+                                {% for f in flavourlsic %}
+                                <option value="{{ f.id }}">{{ f }}</option>
+                                {% endfor %}
+                            </select>
+                            <br>
+                            <br> {% for t in topping %}
+                            <input class="singlecheckbox" type="checkbox" name="topcheck" value="{{ t.id }}">{{ t }}
+                            <br> {% endfor %} {% if user.is_authenticated %}
+                            <input type="submit" value="Add to Cart" /> {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <select name="flavmodel" id="flavmodel"></select>
+    <div class="row">
+            <div class="col-sm-9 col-md-9 col-lg-8 mx-auto">
+                <div class="card my-5">
+                    <div class="card-body" id="subcardbody">
+                        <h5 class="card-title text-center">Subs</h5>
+                        <!-- cannot be any space before svg div - cannot select it -->
+                        <div id='thesuborder'>
+                            <form action="/addsub" method="post">
+                                {% csrf_token %}
+                                <select name="sub" id="whichsub">
+                                    {% for su in subs %}
+                                    <option value="{{ su.id }}">{{ su }}</option>
+                                    {% endfor %}
+                                </select>
+                                </select>
+                                {% if user.is_authenticated %}
+                                <input type="submit" value="Add to Cart" /> {% endif %}
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>    <h1>Pizza</h1>
+    <ul>
+        <li>Pizza Size: {{ pizzasex.size }}</li>
+        <li>Crust: {{ pizzasex.crust }}</li>
+        <li>Flavour: {{ pizzasex.owner.flavour }}</li>
+        <li>Price: {{ pizzasex.owner.price }}</li>
+        <li>
+            Toppings:
+            <ul>
+                {% for topping in toppingsex %}
+                <li>{{ topping }}</li>
+                {% empty %}
+                <li>No topping</li>
+                {% endfor %}
+            </ul>
+        </li>
+    </ul>
 
-        {% if user.is_authenticated %}
-        <input type="submit" value="Add Pizza" />
-        {% endif %}
 
-        <p id="demo"></p>
-
-
-        <div> {{ form }} </div>
-    </form>
 </div>
 {% endblock %}

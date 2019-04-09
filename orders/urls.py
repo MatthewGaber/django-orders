@@ -6,4 +6,5 @@ urlpatterns = [
     path("", views.index, name="index"),
     path("getmodel", views.getmodel, name="getmodel"),
     path("addpizza", views.addpizza, name = "addpizza"),
+    path("addsub", views.addsub, name = "addsub"),
 ]

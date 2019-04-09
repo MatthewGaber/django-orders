@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import User
 #from django.contrib.contenttypes import fields
 # Create your models here.
 
@@ -85,3 +86,20 @@ class Pizza(models.Model):
     def __str__(self):
         return f"{self.size} {self.crust} {self.owner} {self.toppings}"
 
+
+
+
+class Sub(models.Model):
+    flavour = models.CharField(max_length = 64)
+    size = models.CharField(max_length = 64)
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.flavour} {self.size} {self.price}"
+
+class Cart(models.Model):
+    customer = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    pizza = models.ForeignKey(Pizza, null=True, blank=True, on_delete = models.CASCADE)
+    sub = models.ForeignKey(Sub, null=True, blank=True, on_delete = models.CASCADE)
+    def __str__(self):
+        return f"{self.customer} {self.pizza} {self.sub}"

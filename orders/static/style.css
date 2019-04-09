@@ -1,8 +1,21 @@
 body {
-    background: #fafafa;
-    color: #333333;
-    margin-top: 5rem;
-  }
+  margin-top: 50px;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #27ae60;
+  font-family: "proxima-nova", "Source Sans Pro", sans-serif;
+  font-size: 1em;
+  letter-spacing: 0.1px;
+  color: #32465a;
+  text-rendering: optimizeLegibility;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.004);
+  -webkit-font-smoothing: antialiased;
+}
+.container {
+  max-width:1170px; 
+  margin:auto;
+}
   
   h1, h2, h3, h4, h5, h6 {
     color: #444444;
