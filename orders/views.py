@@ -4,28 +4,14 @@ from django.urls import reverse
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core import serializers
-#from .forms import LargeSicilian, SmallSicilian
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.db.models import Sum
 
+from .models import *
 
-
-from .models import Pizza, Toppings, Crust, Size, Flavour, FlavourLReg, FlavourLSic, FlavourSSic, Cart, Sub, SteakCheeseExtras, ExtraCheese, SubOrder
-
-# Create your views here.
 def index(request):
-    #pizza = Pizza.objects.get(pk=2)
-    #fl = FlavourLSic.objects.all()
-    #fls = json.dumps(list(fl), cls=DjangoJSONEncoder)
-    #fls = json.dumps(fl)
-    #fls = serializers.serialize('json', fl)
-    #form = SmallSicilian()
     context = {
-        #"form": form,
-        #"pizzasex": pizza,
-        #"toppingsex": pizza.toppings.all(),
         "topping": Toppings.objects.all(),
         "crust": Crust.objects.all(),
         "size": Size.objects.all(),
@@ -36,9 +22,11 @@ def index(request):
         "subs": Sub.objects.all(),
         "scextras": SteakCheeseExtras.objects.all(),
         "extracheese": ExtraCheese.objects.all(),
-        "suborder": SubOrder.objects.all()
+        "pasta": Pasta.objects.all(),
+        "salad": Salad.objects.all(),
+        "dinnerplatter": DinnerPlatter.objects.all(),
+        }
 
-    }
     return render(request, "orders/index.html", context)
 
 def checkout(request):
@@ -51,19 +39,57 @@ def checkout(request):
         if cartcontents.sub and cartcontents.pizza:
             for t in cartcontents.sub.extratoppings.all():
                 sumofet =+ t.price
-            
             totalprice = cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet + cartcontents.pizza.owner.price
 
         if cartcontents.sub and not cartcontents.pizza:
             for t in cartcontents.sub.extratoppings.all():
                 sumofet =+ t.price
-            
             totalprice = cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet
 
         if cartcontents.pizza and not cartcontents.sub:
             totalprice = cartcontents.pizza.owner.price
 
-        print (totalprice)
+        if cartcontents.pasta and not cartcontents.sub and not cartcontents.pizza:
+            totalprice = cartcontents.pasta.pasta.price
+
+        if cartcontents.pasta and cartcontents.sub and not cartcontents.pizza:
+            for t in cartcontents.sub.extratoppings.all():
+                sumofet =+ t.price
+            totalprice = cartcontents.pasta.pasta.price + cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet
+
+        if cartcontents.pasta and cartcontents.sub and cartcontents.pizza:
+            for t in cartcontents.sub.extratoppings.all():
+                sumofet =+ t.price
+            totalprice = cartcontents.pasta.pasta.price + cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet + cartcontents.pizza.owner.price
+
+        if cartcontents.pasta and not cartcontents.sub and cartcontents.pizza:
+            totalprice = cartcontents.pasta.pasta.price + cartcontents.pizza.owner.price
+
+        if cartcontents.salad and not cartcontents.pasta and not cartcontents.sub and not cartcontents.pizza:
+            totalprice = cartcontents.salad.salad.price
+
+        if cartcontents.salad and cartcontents.pasta and not cartcontents.sub and not cartcontents.pizza:
+            totalprice = cartcontents.salad.salad.price + cartcontents.pasta.pasta.price
+
+        if cartcontents.salad and cartcontents.pasta and cartcontents.sub and not cartcontents.pizza:
+            for t in cartcontents.sub.extratoppings.all():
+                sumofet =+ t.price
+            totalprice = cartcontents.salad.salad.price + cartcontents.pasta.pasta.price + sumofet + cartcontents.sub.extracheese.price + cartcontents.sub.sub.price
+
+        if cartcontents.salad and cartcontents.pasta and cartcontents.sub and cartcontents.pizza:
+            for t in cartcontents.sub.extratoppings.all():
+                sumofet =+ t.price
+            totalprice = cartcontents.salad.salad.price + cartcontents.pasta.pasta.price + cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet + cartcontents.pizza.owner.price
+
+        if cartcontents.salad and not cartcontents.pasta and not cartcontents.sub and cartcontents.pizza:
+            totalprice = cartcontents.salad.salad.price + cartcontents.pizza.owner.price
+
+        if cartcontents.salad and not cartcontents.pasta and cartcontents.sub and not cartcontents.pizza:
+            for t in cartcontents.sub.extratoppings.all():
+                sumofet =+ t.price
+            totalprice = cartcontents.salad.salad.price  + sumofet + cartcontents.sub.extracheese.price + cartcontents.sub.sub.price
+
+        
         context = {
             "cartcontents": cartcontents,
             "totalprice": totalprice,
@@ -89,19 +115,13 @@ def getmodel(request):
         data = serializers.serialize('json', FlavourLReg.objects.all())
         return HttpResponse(data, content_type="application/json")
 
-        
-
 def addpizza(request):
     if request.method == 'POST':
-        print(request.POST)
         toppings = request.POST.getlist('topcheck')
         size = request.POST['size']
         crust = request.POST['crust']
         flavour = request.POST['flavmodel']
-        print(toppings)
-        print(size)
-        print(crust)
-        print(flavour)
+
         if size == '1' and crust == '1':
             newPizza = Pizza.objects.create(
                 size = Size.objects.get(pk=size),
@@ -154,7 +174,6 @@ def addpizza(request):
 
 def addsub(request):
     if request.method == 'POST':
-        print(request.POST)
         sub = request.POST['sub']
         sccheck = request.POST.getlist('sccheck')
         extracheese = request.POST['extracheese']
@@ -176,8 +195,67 @@ def addsub(request):
             )
             messages.success(request, f'Sub Added.')
 
-        #newItem.subs.add(Sub.objects.get(pk=sub))
-        #toppings = request.POST.getlist('topcheck')
-        # size = request.POST['size']
-        # 
+    return redirect('index')
+
+def addpasta(request):
+    if request.method == 'POST':
+        print(request.POST)
+        pasta = request.POST['pasta']
+        newPasta= PastaOrder.objects.create(
+                pasta = Pasta.objects.get(pk=pasta)
+            )
+        # if a cart exists for the current user update cart, else create new cart
+        if Cart.objects.filter(customer=request.user).exists():
+            Cart.objects.filter(customer=request.user).update(pasta=newPasta)
+            messages.success(request, f'Pasta Added.')
+            
+        else:
+            newItem = Cart.objects.create(
+            customer = request.user,
+            pasta = PastaOrder.objects.get(pk=newPasta.id)
+            )
+            messages.success(request, f'Pasta Added.')
+
+    return redirect('index')
+
+def addsalad(request):
+    if request.method == 'POST':
+        print(request.POST)
+        salad = request.POST['salad']
+        newSalad= SaladOrder.objects.create(
+                salad = Salad.objects.get(pk=salad)
+            )
+        # if a cart exists for the current user update cart, else create new cart
+        if Cart.objects.filter(customer=request.user).exists():
+            Cart.objects.filter(customer=request.user).update(salad=newSalad)
+            messages.success(request, f'Salad Added.')
+            
+        else:
+            newItem = Cart.objects.create(
+            customer = request.user,
+            salad = SaladOrder.objects.get(pk=newSalad.id)
+            )
+            messages.success(request, f'Salad Added.')
+
+    return redirect('index')
+
+def addplatter(request):
+    if request.method == 'POST':
+        print(request.POST)
+        platter = request.POST['platter']
+        newPlatter= DinnerPlatterOrder.objects.create(
+                dinnerplatter = DinnerPlatter.objects.get(pk=platter)
+            )
+        # if a cart exists for the current user update cart, else create new cart
+        if Cart.objects.filter(customer=request.user).exists():
+            Cart.objects.filter(customer=request.user).update(dinnerplatter=newPlatter)
+            messages.success(request, f'Platter Added.')
+            
+        else:
+            newItem = Cart.objects.create(
+            customer = request.user,
+            dinnerplatter = DinnerPlatterOrder.objects.get(pk=newPlatter.id)
+            )
+            messages.success(request, f'Platter Added.')
+
     return redirect('index')

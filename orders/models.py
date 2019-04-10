@@ -110,9 +110,46 @@ class SubOrder(models.Model):
     def __str__(self):
         return f"{self.sub} {self.extracheese} {self.extratoppings}"
 
+class Pasta(models.Model):
+    flavour = models.CharField(max_length = 64)
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    def __str__(self):
+        return f"{self.flavour} {self.price}"
+
+class Salad(models.Model):
+    flavour = models.CharField(max_length = 64)
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    def __str__(self):
+        return f"{self.flavour} {self.price}"
+
+class DinnerPlatter(models.Model):
+    flavour = models.CharField(max_length = 64)
+    size = models.CharField(max_length = 64)
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    def __str__(self):
+        return f"{self.flavour} {self.size} {self.price}"
+
+class PastaOrder(models.Model):
+    pasta = models.ForeignKey(Pasta, on_delete = models.CASCADE, related_name="pastaorder")
+    def __str__(self):
+        return f"{self.pasta}"
+
+class SaladOrder(models.Model):
+    salad = models.ForeignKey(Salad, on_delete = models.CASCADE, related_name="saldorder")
+    def __str__(self):
+        return f"{self.salad}"
+
+class DinnerPlatterOrder(models.Model):
+    dinnerplatter = models.ForeignKey(DinnerPlatter, on_delete = models.CASCADE, related_name="platterorder")
+    def __str__(self):
+        return f"{self.dinnerplatter}"
+
 class Cart(models.Model):
     customer = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
     pizza = models.ForeignKey(Pizza, null=True, blank=True, on_delete = models.CASCADE)
     sub = models.ForeignKey(SubOrder, null=True, blank=True, on_delete = models.CASCADE)
+    pasta = models.ForeignKey(PastaOrder, null=True, blank=True, on_delete = models.CASCADE)
+    salad = models.ForeignKey(SaladOrder, null=True, blank=True, on_delete = models.CASCADE)
+    dinnerplatter = models.ForeignKey(DinnerPlatterOrder, null=True, blank=True, on_delete = models.CASCADE)
     def __str__(self):
-        return f"{self.customer} {self.pizza} {self.sub}"
+        return f"{self.customer} {self.pizza} {self.sub} {self.pasta} {self.salad} {self.dinnerplatter}"
