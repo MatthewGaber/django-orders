@@ -1,47 +1,58 @@
 {% extends "orders/base.html" %}{% block head %} {% endblock %} {% block body %}
 <div class="container">
-    <h3>Order</h3>
-    <ul>
-            <li>Customer: {{ customer }}</li>
-            <li>Sub: {{ sub }}</li>
-            <li>Sub Size: {{ subsize }}</li>
-            <li>Sub Price: {{ subprice }}</li>
-            <li>Extra Cheese: {{ extracheese }}</li>
-            <li>Extra Cheese Price: {{ extracheeseprice }}</li>
+    <div class="row">
+        <div class="col-sm-9 col-md-9 col-lg-8 mx-auto">
+            <div class="card my-5">
+                <div class="card-body" id="cardbody">
+                    {% if cartcontents.customer %}
+                    <h4>Order</h4>
+                    <h5>Customer: {{ cartcontents.customer }}</h5>
+                    {% if cartcontents.sub %}
+                    <h5>Sub</h5>
+                    <ul>
+                        <li>Sub: {{ cartcontents.sub.sub.flavour }}</li>
+                        <li>Sub Size: {{ cartcontents.sub.sub.size }}</li>
+                        <li>Sub Price: {{ cartcontents.sub.sub.price }}</li>
+                        <li>Extra Cheese: {{ cartcontents.sub.extracheese.extra }}</li>
+                        <li>Extra Cheese Price: {{ cartcontents.sub.extracheese.price }}</li>
 
-            <li>Extra Toppings: <ul>
-                {% for t in extratoppings %}
-                <li>{{ t.scextras }}</li>
-                <li>{{ t.price }}</li>
-                {% empty %}
-                <li>No topping</li>
-                {% endfor %}
-            </ul></li>
-            <li>Extra Toppings Price: {{ extratoppingsprice }}</li>
-        <li>Pizza Size: {{ pizzasex.size }}</li>
-        <li>Crust: {{ pizzasex.crust }}</li>
-        <li>Flavour: {{ pizzasex.owner.flavour }}</li>
-        <li>Price: {{ pizzasex.owner.price }}</li>
-        <li>
-            Toppings:
-            <ul>
-                {% for c in pizza %}
-                <li>{{ c }}</li>
-                {% empty %}
-                <li>No topping</li>
-                {% endfor %}
-            </ul>
-        </li>
-    </ul>
-
-
+                        <li>Extra Toppings:
+                            <ul>
+                                {% for t in cartcontents.sub.extratoppings.all %}
+                                <li>{{ t.scextras }}</li>
+                                <li>Price {{ t.price }}</li>
+                                {% empty %}
+                                <li>No topping</li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    </ul>
+                    {% endif %}
+                    {% if cartcontents.pizza %}
+                    <h5>Pizza</h5>
+                    <ul>
+                        <li>Pizza Crust: {{ cartcontents.pizza.crust }}</li>
+                        <li>Pizza Size: {{ cartcontents.pizza.size }}</li>
+                        <li>Flavour: {{ cartcontents.pizza.owner.flavour }}</li>
+                        <li>Price: {{ cartcontents.pizza.owner.price }}</li>
+                        <li>
+                            Toppings:
+                            <ul>
+                                {% for t in cartcontents.pizza.toppings.all %}
+                                <li>{{ t }}</li>
+                                {% empty %}
+                                <li>No topping</li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    </ul>
+                    {% endif %}
+                    <br>
+                    <h5>Total Price = ${{ totalprice }}</h5>
+                    {% else %} No Orders {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
-
-"cartcontents": cartcontents,
-        "customer": cartcontents.customer,
-        "sub": cartcontents.sub.sub.flavour,
-        "subsize": cartcontents.sub.sub.size,
-        "subprice": cartcontents.sub.sub.price,
-        "extracheese": cartcontents.sub.extracheese.extra,
-        "extracheeseprice": cartcontents.sub.extracheese.price,

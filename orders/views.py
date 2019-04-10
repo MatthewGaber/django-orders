@@ -8,6 +8,7 @@ from django.core import serializers
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.db.models import Sum
 
 
 
@@ -41,27 +42,32 @@ def index(request):
     return render(request, "orders/index.html", context)
 
 def checkout(request):
-    cartcontents = Cart.objects.get(customer=request.user)
-    print (cartcontents)
-    #pizza = Pizza.objects.get(pk=2)
-    #fl = FlavourLSic.objects.all()
-    #fls = json.dumps(list(fl), cls=DjangoJSONEncoder)
-    #fls = json.dumps(fl)
-    #ccser = serializers.serialize('json', cartcontents)
-    #print(ccser)
-    #form = SmallSicilian()
-    context = {
-        "cartcontents": cartcontents,
-        "customer": cartcontents.customer,
-        "sub": cartcontents.sub.sub.flavour,
-        "subsize": cartcontents.sub.sub.size,
-        "subprice": cartcontents.sub.sub.price,
-        "extracheese": cartcontents.sub.extracheese.extra,
-        "extracheeseprice": cartcontents.sub.extracheese.price,
-        "extratoppings": cartcontents.sub.extratoppings.all(),
-        "extratoppingsprice": cartcontents.sub.extracheese.price,
+    context = {}
+    if Cart.objects.filter(customer=request.user).exists():
+        cartcontents = Cart.objects.get(customer=request.user)
+        print (cartcontents)
+        sumofet = 0
+        
+        if cartcontents.sub and cartcontents.pizza:
+            for t in cartcontents.sub.extratoppings.all():
+                sumofet =+ t.price
+            
+            totalprice = cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet + cartcontents.pizza.owner.price
 
-    }
+        if cartcontents.sub and not cartcontents.pizza:
+            for t in cartcontents.sub.extratoppings.all():
+                sumofet =+ t.price
+            
+            totalprice = cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet
+
+        if cartcontents.pizza and not cartcontents.sub:
+            totalprice = cartcontents.pizza.owner.price
+
+        print (totalprice)
+        context = {
+            "cartcontents": cartcontents,
+            "totalprice": totalprice,
+            }
     
     return render(request, "orders/checkout.html", context)
 
@@ -135,13 +141,15 @@ def addpizza(request):
 
         if Cart.objects.filter(customer=request.user).exists():
             Cart.objects.filter(customer=request.user).update(pizza=newPizza)
+            messages.success(request, f'Pizza Added.')
         else:
             newItem = Cart.objects.create(
             customer = request.user,
             pizza = Pizza.objects.get(pk=newPizza.id)
-        )
-        
-    return HttpResponse('wtf', content_type="application/json")
+            )
+            messages.success(request, f'Pizza Added.')
+    
+    return redirect('index')
 
 
 def addsub(request):
