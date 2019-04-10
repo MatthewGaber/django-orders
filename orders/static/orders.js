@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     $.each(data, function (i, item) {
                         $('#whichflavmodel').append($('<option>', {
                             value: item.pk,
-                            text: item.fields['flavour'] + " " + item.fields['price']
+                            text: item.fields['flavour'] + " $" + item.fields['price']
                         }));
                     });
 
@@ -44,6 +44,25 @@ document.addEventListener('DOMContentLoaded', () => {
        if($(this).siblings(':checked').length >= limit) {
            this.checked = false;
        }
+    });
+
+    $('#sc').css({
+        'display': 'none'
+     });
+    $('#whichsub').change(function() {
+        //Use $option (with the "$") to see that the variable is a jQuery object
+        var $option = $(this).find('option:selected');
+        //Added with the EDIT
+        var value = $option.val();//to get content of "value" attrib
+        var text = $option.text();//to get <option>Text</option> content
+        console.log(value);
+        console.log(text);
+        if (text.includes("Steak and Cheese")) {
+            $('#sc').show();
+        } else {
+            $('#sc').hide();
+        }
+        
     });
 
 });

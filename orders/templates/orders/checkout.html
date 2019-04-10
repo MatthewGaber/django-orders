@@ -1,0 +1,47 @@
+{% extends "orders/base.html" %}{% block head %} {% endblock %} {% block body %}
+<div class="container">
+    <h3>Order</h3>
+    <ul>
+            <li>Customer: {{ customer }}</li>
+            <li>Sub: {{ sub }}</li>
+            <li>Sub Size: {{ subsize }}</li>
+            <li>Sub Price: {{ subprice }}</li>
+            <li>Extra Cheese: {{ extracheese }}</li>
+            <li>Extra Cheese Price: {{ extracheeseprice }}</li>
+
+            <li>Extra Toppings: <ul>
+                {% for t in extratoppings %}
+                <li>{{ t.scextras }}</li>
+                <li>{{ t.price }}</li>
+                {% empty %}
+                <li>No topping</li>
+                {% endfor %}
+            </ul></li>
+            <li>Extra Toppings Price: {{ extratoppingsprice }}</li>
+        <li>Pizza Size: {{ pizzasex.size }}</li>
+        <li>Crust: {{ pizzasex.crust }}</li>
+        <li>Flavour: {{ pizzasex.owner.flavour }}</li>
+        <li>Price: {{ pizzasex.owner.price }}</li>
+        <li>
+            Toppings:
+            <ul>
+                {% for c in pizza %}
+                <li>{{ c }}</li>
+                {% empty %}
+                <li>No topping</li>
+                {% endfor %}
+            </ul>
+        </li>
+    </ul>
+
+
+</div>
+{% endblock %}
+
+"cartcontents": cartcontents,
+        "customer": cartcontents.customer,
+        "sub": cartcontents.sub.sub.flavour,
+        "subsize": cartcontents.sub.sub.size,
+        "subprice": cartcontents.sub.sub.price,
+        "extracheese": cartcontents.sub.extracheese.extra,
+        "extracheeseprice": cartcontents.sub.extracheese.price,

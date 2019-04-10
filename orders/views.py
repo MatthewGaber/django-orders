@@ -1,5 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -7,10 +7,11 @@ from django.core import serializers
 #from .forms import LargeSicilian, SmallSicilian
 from django.http import JsonResponse
 from django.contrib.auth.models import User
+from django.contrib import messages
 
 
 
-from .models import Pizza, Toppings, Crust, Size, Flavour, FlavourLReg, FlavourLSic, FlavourSSic, Cart, Sub
+from .models import Pizza, Toppings, Crust, Size, Flavour, FlavourLReg, FlavourLSic, FlavourSSic, Cart, Sub, SteakCheeseExtras, ExtraCheese, SubOrder
 
 # Create your views here.
 def index(request):
@@ -31,10 +32,38 @@ def index(request):
         "flavourlreg": FlavourLReg.objects.all(),
         "flavourlsic": FlavourLSic.objects.all(),
         "flavourssic": FlavourSSic.objects.all(),
-        "subs": Sub.objects.all()
+        "subs": Sub.objects.all(),
+        "scextras": SteakCheeseExtras.objects.all(),
+        "extracheese": ExtraCheese.objects.all(),
+        "suborder": SubOrder.objects.all()
 
     }
     return render(request, "orders/index.html", context)
+
+def checkout(request):
+    cartcontents = Cart.objects.get(customer=request.user)
+    print (cartcontents)
+    #pizza = Pizza.objects.get(pk=2)
+    #fl = FlavourLSic.objects.all()
+    #fls = json.dumps(list(fl), cls=DjangoJSONEncoder)
+    #fls = json.dumps(fl)
+    #ccser = serializers.serialize('json', cartcontents)
+    #print(ccser)
+    #form = SmallSicilian()
+    context = {
+        "cartcontents": cartcontents,
+        "customer": cartcontents.customer,
+        "sub": cartcontents.sub.sub.flavour,
+        "subsize": cartcontents.sub.sub.size,
+        "subprice": cartcontents.sub.sub.price,
+        "extracheese": cartcontents.sub.extracheese.extra,
+        "extracheeseprice": cartcontents.sub.extracheese.price,
+        "extratoppings": cartcontents.sub.extratoppings.all(),
+        "extratoppingsprice": cartcontents.sub.extracheese.price,
+
+    }
+    
+    return render(request, "orders/checkout.html", context)
 
 def getmodel(request):
     size = request.GET.get('size', None)
@@ -104,10 +133,14 @@ def addpizza(request):
                 newPizza.toppings.add(Toppings.objects.get(pk=t))
 
 
-        newItem = Cart.objects.create(
+        if Cart.objects.filter(customer=request.user).exists():
+            Cart.objects.filter(customer=request.user).update(pizza=newPizza)
+        else:
+            newItem = Cart.objects.create(
             customer = request.user,
             pizza = Pizza.objects.get(pk=newPizza.id)
         )
+        
     return HttpResponse('wtf', content_type="application/json")
 
 
@@ -115,10 +148,28 @@ def addsub(request):
     if request.method == 'POST':
         print(request.POST)
         sub = request.POST['sub']
-        Cart.objects.filter(customer=request.user).update(sub=sub)
+        sccheck = request.POST.getlist('sccheck')
+        extracheese = request.POST['extracheese']
+        newSub = SubOrder.objects.create(
+                sub = Sub.objects.get(pk=sub),
+                extracheese = ExtraCheese.objects.get(pk=extracheese),
+            )
+        for t in sccheck:
+            newSub.extratoppings.add(SteakCheeseExtras.objects.get(pk=t))
+
+        if Cart.objects.filter(customer=request.user).exists():
+            Cart.objects.filter(customer=request.user).update(sub=newSub)
+            messages.success(request, f'Sub Added.')
+            
+        else:
+            newItem = Cart.objects.create(
+            customer = request.user,
+            sub = SubOrder.objects.get(pk=newSub.id)
+            )
+            messages.success(request, f'Sub Added.')
+
         #newItem.subs.add(Sub.objects.get(pk=sub))
         #toppings = request.POST.getlist('topcheck')
         # size = request.POST['size']
-
-
-    return HttpResponse('wtf', content_type="application/json")
+        # 
+    return redirect('index')
