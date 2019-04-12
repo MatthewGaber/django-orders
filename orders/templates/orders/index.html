@@ -127,27 +127,27 @@
     </div>
 
     <div class="row">
-            <div class="col-sm-9 col-md-9 col-lg-8 mx-auto">
-                <div class="card my-5">
-                    <div class="card-body" id="plattercardbody">
-                        <h5 class="card-title text-center">Dinner Platter</h5>
-                        <!-- cannot be any space before svg div - cannot select it -->
-                        <div id='theplatterorder'>
-                            <form action="/addplatter" method="post">
-                                {% csrf_token %}
-                                <h6>Dinner Platter</h6>
-                                <select name="platter" id="whichplatter">
-                                    {% for p in dinnerplatter %}
-                                    <option value="{{ p.id }}">{{ p }}</option>
-                                    {% endfor %}
-                                </select>
-                                {% if user.is_authenticated %}
-                                <input type="submit" value="Add to Cart" /> {% endif %}
-                            </form>
-                        </div>
+        <div class="col-sm-9 col-md-9 col-lg-8 mx-auto">
+            <div class="card my-5">
+                <div class="card-body" id="plattercardbody">
+                    <h5 class="card-title text-center">Dinner Platter</h5>
+                    <!-- cannot be any space before svg div - cannot select it -->
+                    <div id='theplatterorder'>
+                        <form action="/addplatter" method="post">
+                            {% csrf_token %}
+                            <h6>Dinner Platter</h6>
+                            <select name="platter" id="whichplatter">
+                                {% for p in dinnerplatter %}
+                                <option value="{{ p.id }}">{{ p }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if user.is_authenticated %}
+                            <input type="submit" value="Add to Cart" /> {% endif %}
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 </div>
 {% endblock %}

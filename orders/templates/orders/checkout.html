@@ -15,7 +15,6 @@
                         <li>Sub Price: {{ cartcontents.sub.sub.price }}</li>
                         <li>Extra Cheese: {{ cartcontents.sub.extracheese.extra }}</li>
                         <li>Extra Cheese Price: {{ cartcontents.sub.extracheese.price }}</li>
-
                         <li>Extra Toppings:
                             <ul>
                                 {% for t in cartcontents.sub.extratoppings.all %}
@@ -27,8 +26,7 @@
                             </ul>
                         </li>
                     </ul>
-                    {% endif %}
-                    {% if cartcontents.pizza %}
+                    {% endif %} {% if cartcontents.pizza %}
                     <h5>Pizza</h5>
                     <ul>
                         <li>Pizza Crust: {{ cartcontents.pizza.crust }}</li>
@@ -46,24 +44,21 @@
                             </ul>
                         </li>
                     </ul>
-                    {% endif %}
-                    {% if cartcontents.pasta %}
+                    {% endif %} {% if cartcontents.pasta %}
                     <h5>Pasta</h5>
                     <ul>
                         <li>Pasta: {{ cartcontents.pasta.pasta.flavour }}</li>
                         <li>Pasta Price: {{ cartcontents.pasta.pasta.price }}</li>
                     </ul>
                     {% endif %}
-                    <br>
-                    {% if cartcontents.salad %}
+                    <br> {% if cartcontents.salad %}
                     <h5>Salad</h5>
                     <ul>
                         <li>Salad: {{ cartcontents.salad.salad.flavour }}</li>
                         <li>Salad Price: {{ cartcontents.salad.salad.price }}</li>
                     </ul>
                     {% endif %}
-                    <br>
-                    {% if cartcontents.dinnerplatter %}
+                    <br> {% if cartcontents.dinnerplatter %}
                     <h5>Dinner Platter</h5>
                     <ul>
                         <li>Dinner Platter: {{ cartcontents.dinnerplatter.dinnerplatter.flavour }}</li>
@@ -72,6 +67,10 @@
                     {% endif %}
                     <br>
                     <h5>Total Price = ${{ totalprice }}</h5>
+                    <form action="/confirm" method="post">
+                        {% csrf_token %} {% if user.is_authenticated %}
+                        <input type="submit" value="Confirm" /> {% endif %}
+                    </form>
                     {% else %} No Orders {% endif %}
                 </div>
             </div>

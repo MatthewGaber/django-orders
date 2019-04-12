@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
-#from django.contrib.contenttypes import fields
-# Create your models here.
 
 class Toppings(models.Model): 
     topping = models.CharField(max_length = 64)
@@ -63,10 +61,6 @@ class Pizza(models.Model):
     flavourls = models.ForeignKey(FlavourLSic, null=True, blank=True, on_delete = models.CASCADE, related_name="fls")
     toppings = models.ManyToManyField(Toppings, blank=True, related_name="pizzatoppings")
 
-    #content_type = models.ForeignKey(ContentType, on_delete = models.CASCADE)
-    #object_id = models.PositiveIntegerField()
-    #content_object = fields.GenericForeignKey('content_type', 'object_id')
-
     @property
     def owner(self):
         if self.flavoursr_id is not None:
@@ -88,6 +82,7 @@ class SteakCheeseExtras(models.Model):
 
     def __str__(self):
         return f"{self.scextras} {self.price}"
+
 class ExtraCheese(models.Model):
     extra = models.BooleanField(default=False)
     price = models.DecimalField(null=True, blank=True, max_digits=5, decimal_places=2)
@@ -107,18 +102,21 @@ class SubOrder(models.Model):
     sub = models.ForeignKey(Sub, on_delete = models.CASCADE, related_name="basesub")
     extracheese = models.ForeignKey(ExtraCheese, null=True, blank=True, on_delete = models.CASCADE, related_name="extracheese")
     extratoppings = models.ManyToManyField(SteakCheeseExtras, blank=True, related_name="extratoppings")
+    
     def __str__(self):
         return f"{self.sub} {self.extracheese} {self.extratoppings}"
 
 class Pasta(models.Model):
     flavour = models.CharField(max_length = 64)
     price = models.DecimalField(max_digits=5, decimal_places=2)
+    
     def __str__(self):
         return f"{self.flavour} {self.price}"
 
 class Salad(models.Model):
     flavour = models.CharField(max_length = 64)
     price = models.DecimalField(max_digits=5, decimal_places=2)
+    
     def __str__(self):
         return f"{self.flavour} {self.price}"
 
@@ -126,21 +124,25 @@ class DinnerPlatter(models.Model):
     flavour = models.CharField(max_length = 64)
     size = models.CharField(max_length = 64)
     price = models.DecimalField(max_digits=5, decimal_places=2)
+    
     def __str__(self):
         return f"{self.flavour} {self.size} {self.price}"
 
 class PastaOrder(models.Model):
     pasta = models.ForeignKey(Pasta, on_delete = models.CASCADE, related_name="pastaorder")
+    
     def __str__(self):
         return f"{self.pasta}"
 
 class SaladOrder(models.Model):
     salad = models.ForeignKey(Salad, on_delete = models.CASCADE, related_name="saldorder")
+    
     def __str__(self):
         return f"{self.salad}"
 
 class DinnerPlatterOrder(models.Model):
     dinnerplatter = models.ForeignKey(DinnerPlatter, on_delete = models.CASCADE, related_name="platterorder")
+    
     def __str__(self):
         return f"{self.dinnerplatter}"
 
@@ -151,5 +153,6 @@ class Cart(models.Model):
     pasta = models.ForeignKey(PastaOrder, null=True, blank=True, on_delete = models.CASCADE)
     salad = models.ForeignKey(SaladOrder, null=True, blank=True, on_delete = models.CASCADE)
     dinnerplatter = models.ForeignKey(DinnerPlatterOrder, null=True, blank=True, on_delete = models.CASCADE)
+    
     def __str__(self):
         return f"{self.customer} {self.pizza} {self.sub} {self.pasta} {self.salad} {self.dinnerplatter}"

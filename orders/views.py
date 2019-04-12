@@ -1,16 +1,20 @@
+import json
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse
-import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core import serializers
+from django.conf import settings
+from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.db.models import Sum
 
 from .models import *
 
 def index(request):
+    #Pass all the menu components to index
     context = {
         "topping": Toppings.objects.all(),
         "crust": Crust.objects.all(),
@@ -31,73 +35,45 @@ def index(request):
 
 def checkout(request):
     context = {}
+    # Get all the cart objects for the logged in user
     if Cart.objects.filter(customer=request.user).exists():
         cartcontents = Cart.objects.get(customer=request.user)
         print (cartcontents)
         sumofet = 0
-        
-        if cartcontents.sub and cartcontents.pizza:
+        totalprice = 0
+        subprice = 0
+        pizzaprice = 0
+        saladprice = 0
+        pastaprice = 0
+        platterprice = 0
+
+        if cartcontents.sub:
             for t in cartcontents.sub.extratoppings.all():
                 sumofet =+ t.price
-            totalprice = cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet + cartcontents.pizza.owner.price
+            subprice = cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet
 
-        if cartcontents.sub and not cartcontents.pizza:
-            for t in cartcontents.sub.extratoppings.all():
-                sumofet =+ t.price
-            totalprice = cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet
+        if cartcontents.pizza:
+            pizzaprice = cartcontents.pizza.owner.price
 
-        if cartcontents.pizza and not cartcontents.sub:
-            totalprice = cartcontents.pizza.owner.price
+        if cartcontents.pasta:
+            pastaprice = cartcontents.pasta.pasta.price
 
-        if cartcontents.pasta and not cartcontents.sub and not cartcontents.pizza:
-            totalprice = cartcontents.pasta.pasta.price
+        if cartcontents.salad:
+            saladprice = cartcontents.salad.salad.price
 
-        if cartcontents.pasta and cartcontents.sub and not cartcontents.pizza:
-            for t in cartcontents.sub.extratoppings.all():
-                sumofet =+ t.price
-            totalprice = cartcontents.pasta.pasta.price + cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet
+        if cartcontents.dinnerplatter:
+            platterprice = cartcontents.dinnerplatter.dinnerplatter.price
 
-        if cartcontents.pasta and cartcontents.sub and cartcontents.pizza:
-            for t in cartcontents.sub.extratoppings.all():
-                sumofet =+ t.price
-            totalprice = cartcontents.pasta.pasta.price + cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet + cartcontents.pizza.owner.price
-
-        if cartcontents.pasta and not cartcontents.sub and cartcontents.pizza:
-            totalprice = cartcontents.pasta.pasta.price + cartcontents.pizza.owner.price
-
-        if cartcontents.salad and not cartcontents.pasta and not cartcontents.sub and not cartcontents.pizza:
-            totalprice = cartcontents.salad.salad.price
-
-        if cartcontents.salad and cartcontents.pasta and not cartcontents.sub and not cartcontents.pizza:
-            totalprice = cartcontents.salad.salad.price + cartcontents.pasta.pasta.price
-
-        if cartcontents.salad and cartcontents.pasta and cartcontents.sub and not cartcontents.pizza:
-            for t in cartcontents.sub.extratoppings.all():
-                sumofet =+ t.price
-            totalprice = cartcontents.salad.salad.price + cartcontents.pasta.pasta.price + sumofet + cartcontents.sub.extracheese.price + cartcontents.sub.sub.price
-
-        if cartcontents.salad and cartcontents.pasta and cartcontents.sub and cartcontents.pizza:
-            for t in cartcontents.sub.extratoppings.all():
-                sumofet =+ t.price
-            totalprice = cartcontents.salad.salad.price + cartcontents.pasta.pasta.price + cartcontents.sub.sub.price + cartcontents.sub.extracheese.price + sumofet + cartcontents.pizza.owner.price
-
-        if cartcontents.salad and not cartcontents.pasta and not cartcontents.sub and cartcontents.pizza:
-            totalprice = cartcontents.salad.salad.price + cartcontents.pizza.owner.price
-
-        if cartcontents.salad and not cartcontents.pasta and cartcontents.sub and not cartcontents.pizza:
-            for t in cartcontents.sub.extratoppings.all():
-                sumofet =+ t.price
-            totalprice = cartcontents.salad.salad.price  + sumofet + cartcontents.sub.extracheese.price + cartcontents.sub.sub.price
-
-        
+        totalprice = platterprice + saladprice + pastaprice + subprice + pizzaprice
         context = {
             "cartcontents": cartcontents,
             "totalprice": totalprice,
             }
-    
+        
     return render(request, "orders/checkout.html", context)
 
 def getmodel(request):
+    # Pass the appropriate model back
     size = request.GET.get('size', None)
     crust = request.GET.get('crust', None)
     print(type(size))
@@ -116,6 +92,7 @@ def getmodel(request):
         return HttpResponse(data, content_type="application/json")
 
 def addpizza(request):
+    # Create a new Pizza and add to the Cart
     if request.method == 'POST':
         toppings = request.POST.getlist('topcheck')
         size = request.POST['size']
@@ -158,7 +135,7 @@ def addpizza(request):
             for t in toppings:
                 newPizza.toppings.add(Toppings.objects.get(pk=t))
 
-
+        # Update Cart if it exists or create a new one
         if Cart.objects.filter(customer=request.user).exists():
             Cart.objects.filter(customer=request.user).update(pizza=newPizza)
             messages.success(request, f'Pizza Added.')
@@ -257,5 +234,20 @@ def addplatter(request):
             dinnerplatter = DinnerPlatterOrder.objects.get(pk=newPlatter.id)
             )
             messages.success(request, f'Platter Added.')
+
+    return redirect('index')
+
+def confirm(request):
+    # Send a confirmation email to the user
+    if request.method == 'POST':
+        print(request.POST)
+        subject = 'Thank you for your order from DjangoPizza'
+        message = 'Your order will be there in 40 mins'
+        from_email = settings.EMAIL_HOST_USER
+        to_list = [request.user.email]
+
+        send_mail(subject, message, from_email, to_list, fail_silently=True)
+        
+        messages.success(request, f'Order placed and confirmation email sent')
 
     return redirect('index')
